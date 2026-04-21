@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Universal Turing Machine Simulator
 
 This project is a high-performance Turing Machine simulator designed for Automata Theory coursework. 
@@ -34,6 +35,9 @@ It cleanly separates core computation (C language) from interaction & visualizat
 - 1s+1s binary addition, unary increments, palindrome checking, busy beavers.
 - State-machine visualizer mapping the exact active transition against the tape in real time.
 - Smooth playback mechanisms with adjustable UI tracing ticks.
+=======
+
+>>>>>>> 4352bb56d3491b4603175963150ab3c23d6c7f7f
 =======
 
 >>>>>>> 4352bb56d3491b4603175963150ab3c23d6c7f7f
