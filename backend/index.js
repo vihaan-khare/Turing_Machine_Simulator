@@ -78,6 +78,16 @@ function runJSEngine(initialState, maxSteps, tapeInput, transitions, res) {
     res.json({ trace, haltReason, finalState });
 }
 
+function encodeUTMTape(transitions, tapeInput) {
+    let enc = "";
+    for (const t of transitions) {
+        const dir = t.dir === 1 ? 'R' : t.dir === -1 ? 'L' : 'S';
+        enc += `(${t.state},${t.read},${t.nextState},${t.write},${dir});`;
+    }
+    enc += "#" + (tapeInput || "EMPTY");
+    return enc;
+}
+
 function runCEngine(initialState, maxSteps, tapeInput, transitions, res) {
     const tmProcess = spawn(TM_EXECUTABLE);
     let outputData = '';
@@ -88,6 +98,7 @@ function runCEngine(initialState, maxSteps, tapeInput, transitions, res) {
     
     tmProcess.on('close', (code) => {
         if (code !== 0 || errorData) {
+            console.error("C Engine Error:", errorData);
             return runJSEngine(initialState, maxSteps, tapeInput, transitions, res); // Fallback if C crashes
         }
         
@@ -103,7 +114,7 @@ function runCEngine(initialState, maxSteps, tapeInput, transitions, res) {
                     step: parseInt(parts[1]),
                     state: parseInt(parts[2]),
                     head: parseInt(parts[3]),
-                    tape: parts[4].trim()
+                    tape: parts[4] ? parts[4].trim() : ''
                 });
             } else if (line.startsWith('HALT|')) {
                 haltReason = 'halting_state';
@@ -116,11 +127,8 @@ function runCEngine(initialState, maxSteps, tapeInput, transitions, res) {
     });
     
     tmProcess.stdin.write(`${initialState} ${maxSteps}\n`);
-    tmProcess.stdin.write(`${tapeInput || 'EMPTY'}\n`);
-    tmProcess.stdin.write(`${transitions.length}\n`);
-    for (const t of transitions) {
-        tmProcess.stdin.write(`${t.state} ${t.read} ${t.write} ${t.dir} ${t.nextState}\n`);
-    }
+    const utmTape = encodeUTMTape(transitions, tapeInput);
+    tmProcess.stdin.write(`${utmTape}\n`);
     tmProcess.stdin.end();
 }
 
